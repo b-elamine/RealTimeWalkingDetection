@@ -1,36 +1,51 @@
 package com.example.walkingdetection.tools;
 
 public class circularBuffer {
-    private double[] buffer;
+    private final float[] buffer;
     private int head;
     private int tail;
     private int size;
+    private final int windowSize;
+    private final int overlapSize;
 
-    private circularBuffer(int capacity) {
-        buffer = new double[capacity];
+    private circularBuffer(int windowSize, int overlapSize) {
+        buffer = new float[windowSize];
         head = 0;
         tail = 0;
         size = 0;
+        this.windowSize = windowSize;
+        this.overlapSize = overlapSize;
     }
 
-    public void add(double value){
+    public void add(float value) {
         buffer[head] = value;
-        head = (head+1) % buffer.length;
+        head = (head + 1) % buffer.length;
         if (size < buffer.length) {
             size++;
-        } else {
-            tail = (tail + 1) % buffer.length;
         }
-    }
-    public double get(int index) {
-        if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException("Index out of bounds");
+        if (size == buffer.length) {
+            new Thread(this::processWindow).start();
         }
-        return buffer[(tail + index) % buffer.length];
     }
 
-    public int size() {
-        return size;
+    private void processWindow() {
+        float[] window = toArray();
+        // Do processing on window here
+        // ...
+
+        // Update tail to create overlap with next window
+        tail = (tail + windowSize - overlapSize) % buffer.length;
+        size -= (windowSize - overlapSize);
     }
+
+    private float[] toArray() {
+        float[] window = new float[windowSize];
+        for (int i = 0; i < windowSize; i++) {
+            window[i] = buffer[(tail + i) % buffer.length];
+        }
+        return window;
+    }
+
+
 
 }
