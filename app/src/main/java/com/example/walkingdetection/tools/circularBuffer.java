@@ -38,6 +38,8 @@ public class circularBuffer {
         float[] window = toArray();
         // Do processing on window here
         // ...
+        Long start = System.nanoTime(); // for calculating execution time
+
         float sd = calculateStandardDeviation(toArray());
         // Update tail to create overlap with next window
         tail = (tail + windowSize - overlapSize) % buffer.length;

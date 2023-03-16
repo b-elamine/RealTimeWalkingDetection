@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -11,13 +12,14 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.HandlerThread;
 import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.walkingdetection.tools.circularBuffer;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener {
+public class MainActivity extends AppCompatActivity {
 
 
     TextView result;
@@ -25,6 +27,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SensorManager sensorManager;
     private boolean sensorPresent;
     private circularBuffer buffer;
+    private SensorThread sensorThread;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null){
+        if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
             accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             sensorPresent = true;
         } else {
@@ -52,41 +56,51 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // Initialize the buffer with window size and overlap size
         buffer = new circularBuffer(50, 25);
 
+        // SensorThread instance
+        sensorThread = new SensorThread((SensorManager) getSystemService(Context.SENSOR_SERVICE), buffer);
     }
 
     @Override
-    public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+    protected void onDestroy() {
+        super.onDestroy();
+        sensorThread.stopSensor();
+    }
 
+
+    public class SensorThread extends Thread implements SensorEventListener {
+
+        private final SensorManager sensorManager;
+        private final Sensor sensor;
+        private final circularBuffer buffer;
+
+        public SensorThread(SensorManager sensorManager, circularBuffer buffer) {
+            this.sensorManager = sensorManager;
+            this.sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            this.buffer = buffer;
+        }
+
+        @Override
+        public void run() {
+            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_FASTEST);
+        }
+
+        @Override
+        public void onSensorChanged(SensorEvent event) {
             float x = event.values[0];
             float y = event.values[1];
             float z = event.values[2];
             float mag = (float) (Math.sqrt((Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(y, 2))));
 
             buffer.add(mag);
-            if (buffer.getProcessedData() != null) {
-                result.setText(buffer.getProcessedData().getStepCount());
-            }
-
-        }
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-
-            sensorManager.registerListener(this,
-                    accelerometer,
-                    SensorManager.SENSOR_DELAY_GAME);
-        } else {
-            Toast.makeText(this, "Sensor Not found", Toast.LENGTH_SHORT).show();
         }
 
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+            // do nothing
+        }
+
+        public void stopSensor() {
+            sensorManager.unregisterListener(this);
+        }
     }
 }
