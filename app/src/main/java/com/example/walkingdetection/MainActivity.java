@@ -15,6 +15,8 @@ import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.walkingdetection.tools.circularBuffer;
+
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
 
@@ -22,6 +24,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Sensor accelerometer;
     private SensorManager sensorManager;
     private boolean sensorPresent;
+    private circularBuffer buffer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,14 +49,25 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             result.setText("No sensor found !");
             sensorPresent = false;
         }
-
+        // Initialize the buffer with window size and overlap size
+        buffer = new circularBuffer(50, 25);
 
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            result.setText(String.valueOf(event.values[0]));
+
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
+            float mag = (float) (Math.sqrt((Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(y, 2))));
+
+            buffer.add(mag);
+            if (buffer.getProcessedData() != null) {
+                result.setText(buffer.getProcessedData().getStepCount());
+            }
+
         }
     }
 
