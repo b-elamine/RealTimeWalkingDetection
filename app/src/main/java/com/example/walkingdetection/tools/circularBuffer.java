@@ -7,6 +7,7 @@ public class circularBuffer {
     private int size;
     private final int windowSize;
     private final int overlapSize;
+    private gaitAnalysis processedData;
 
     private circularBuffer(int windowSize, int overlapSize) {
         buffer = new float[windowSize];
@@ -28,7 +29,7 @@ public class circularBuffer {
         }
     }
 
-    private gaitAnalysis processWindow() {
+    private void processWindow() {
         float[] window = toArray();
         // Do processing on window here
         // ...
@@ -36,7 +37,15 @@ public class circularBuffer {
         // Update tail to create overlap with next window
         tail = (tail + windowSize - overlapSize) % buffer.length;
         size -= (windowSize - overlapSize);
-        return new gaitAnalysis(true, 1); //here we replace "true" and "1" by the results of the processing
+        // save the output of the processing
+        processedData = new gaitAnalysis(true, 1); // true and one replaced by the results
+
+    }
+
+    public gaitAnalysis getProcessedData(){
+        gaitAnalysis data = processedData;
+        processedData = null;
+        return  data;
     }
 
     private float[] toArray() {
