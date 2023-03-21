@@ -54,7 +54,7 @@ public class circularBuffer {
             index.add(i++);
         }
         Pair<List<Float>, List<Float>> peaks = peaksDetect(afc_window, 3.0E-01f, index);
-
+        System.out.println("this is a peak : "+peaks);
 
         // Update tail to create overlap with next window
         tail = (tail + windowSize - overlapSize) % buffer.length;
