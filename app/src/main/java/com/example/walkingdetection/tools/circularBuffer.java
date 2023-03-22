@@ -53,22 +53,25 @@ public class circularBuffer {
              ) {
             index.add(i++);
         }
-        Pair<List<Float>, List<Float>> peaks = peaksDetect(afc_window, 3.0E-01f, index);
+        Pair<List<Float>, List<Float>> peaks = peaksDetect(afc_window, 1.2f, index);
+        //System.out.println("_________Peaks__________ : " +peaks);
 
 
         // Update tail to create overlap with next window
         tail = (tail + windowSize - overlapSize) % buffer.length;
         size -= (windowSize - overlapSize);
         // save the output of the processing
-        processedData = new gaitAnalysis(true, 80, sd); // true and one replaced by the results
-
+        processedData = new gaitAnalysis(true, tail, sd); // true and one replaced by the results
+        //System.out.println("Standard deviation : "+getProcessedData().getStandardDeviation());
     }
 
     public gaitAnalysis getProcessedData() {
-        gaitAnalysis data = processedData;
-        processedData = null;
-        return data;
+        if (processedData!=null){
+            return processedData;
+        }
+        return null;
     }
+
 
     private float[] toArray() {
         float[] window = new float[windowSize];
@@ -197,16 +200,20 @@ public class circularBuffer {
             }
             if (lookingForMax) {
                 if (val < max - delta) {
-                    maxPeaks.add(max);
-                    positionMax.add(maxPos);
+                    if (maxPos!=0){
+                        maxPeaks.add(max);
+                        positionMax.add(maxPos);
+                    }
                     min = val;
                     minPos = index.get(i);
                     lookingForMax = false;
                 }
             } else {
                 if (val > min + delta) {
-                    minPeaks.add(min);
-                    positionMin.add(minPos);
+                    if (minPos!=0){
+                        minPeaks.add(min);
+                        positionMin.add(minPos);
+                    }
                     max = val;
                     maxPos = index.get(i);
                     lookingForMax = true;

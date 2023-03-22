@@ -18,4 +18,8 @@ public class gaitAnalysis {
     public int getStepCount(){
         return stepCount;
     }
+
+    public float getStandardDeviation() {
+        return standardDeviation;
+    }
 }
