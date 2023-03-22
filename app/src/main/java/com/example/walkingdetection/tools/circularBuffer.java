@@ -35,27 +35,12 @@ public class circularBuffer {
     }
 
     private void processWindow() {
+        float[] window = toArray();
+        // Do processing on window here
+        // ...
+        Long start = System.nanoTime(); // for calculating execution time
 
-        // Standard Deviation
         float sd = calculateStandardDeviation(toArray());
-
-        // Calculating AFC
-        List<Float> window = new ArrayList<Float>(toArray().length);
-        for (float f : toArray()){
-            window.add(f);
-        }
-        List<Float> afc_window = afc(window,window.size());
-
-        // Peaks Detection
-        float i =0;
-        List<Float> index = new ArrayList<>();
-        for (float f : afc_window
-             ) {
-            index.add(i++);
-        }
-        Pair<List<Float>, List<Float>> peaks = peaksDetect(afc_window, 3.0E-01f, index);
-
-
         // Update tail to create overlap with next window
         tail = (tail + windowSize - overlapSize) % buffer.length;
         size -= (windowSize - overlapSize);
@@ -215,6 +200,4 @@ public class circularBuffer {
         }
         return new Pair<>(positionMax, maxPeaks);
     }
-
-
 }
