@@ -22,4 +22,6 @@ public class gaitAnalysis {
     public float getStandardDeviation() {
         return standardDeviation;
     }
+
+
 }

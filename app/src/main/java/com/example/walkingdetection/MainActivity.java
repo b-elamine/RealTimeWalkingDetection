@@ -1,5 +1,4 @@
 package com.example.walkingdetection;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
@@ -13,10 +12,8 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.HandlerThread;
 import android.view.WindowManager;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.walkingdetection.tools.circularBuffer;
 import com.github.mikephil.charting.charts.LineChart;
@@ -34,13 +31,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     TextView result;
-    private Sensor accelerometer;
-    private SensorManager sensorManager;
-    private boolean sensorPresent;
-    private circularBuffer buffer;
     private SensorThread sensorThread;
     private LineChart mChart;
-    private LineChart mChartSd;
 
 
     @Override
@@ -56,28 +48,32 @@ public class MainActivity extends AppCompatActivity {
         }
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        //private Sensor accelerometer;
+        SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        boolean sensorPresent;
         if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-            accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            //accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             sensorPresent = true;
         } else {
             result.setText("No sensor found !");
             sensorPresent = false;
         }
-        // Initialize the buffer with window size and overlap size
-        buffer = new circularBuffer(200, 50);
 
-        // SensorThread instance
-        sensorThread = new SensorThread((SensorManager) getSystemService(Context.SENSOR_SERVICE), buffer);
-        //result.setText("Standard deviation : "+buffer.getProcessedData().getStandardDeviation());
+        if (sensorPresent) {
+            // Initialize the buffer with window size and overlap size
+            circularBuffer buffer = new circularBuffer(200, 50);
 
-        mChart = (LineChart) findViewById(R.id.chart);
-        mChartSd = (LineChart) findViewById(R.id.chartsd);
+            // SensorThread instance
+            sensorThread = new SensorThread((SensorManager) getSystemService(Context.SENSOR_SERVICE), buffer);
+            //result.setText("Standard deviation : "+buffer.getProcessedData().getStandardDeviation());
 
-        init_Charts(mChart);
+            mChart = (LineChart) findViewById(R.id.chart);
+            LineChart mChartSd = (LineChart) findViewById(R.id.chartsd);
 
-        sensorThread.start(); //start collecting processing and plotting ..
+            init_Charts(mChart);
 
+            sensorThread.start(); //start collecting processing and plotting ..
+        }
     }
 
     private void init_Charts(LineChart chart){
@@ -223,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
                 result.setText("STD : " + df.format(buffer.getProcessedData().getStandardDeviation()));
                 System.out.println("_______________std_______________   " +
                         df.format(buffer.getProcessedData().getStandardDeviation()) +
-                        "   "
+                        "  + "
                         + buffer.getProcessedData().getStepCount());
             }
 
