@@ -1,9 +1,9 @@
 package com.example.walkingdetection.tools;
 
 public class gaitAnalysis {
-    private boolean isWalking;
-    private int stepCount;
-    private float standardDeviation;
+    private final boolean isWalking;
+    private final int stepCount;
+    private final float standardDeviation;
 
     public gaitAnalysis(boolean isWalking, int stepCount, float standardDeviation){
         this.isWalking = isWalking;

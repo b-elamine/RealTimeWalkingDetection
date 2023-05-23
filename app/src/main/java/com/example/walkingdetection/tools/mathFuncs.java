@@ -11,9 +11,9 @@ public class mathFuncs {
     // Standard Deviation
     public static float calculateStandardDeviation(float[] data) {
         float sum = 0.0F;
-        float mean = 0.0F;
+        float mean;
         float variance = 0.0F;
-        float standardDeviation = 0.0F;
+        float standardDeviation;
 
         // Calculate sum of all elements in array
         for(float num : data) {
@@ -60,7 +60,7 @@ public class mathFuncs {
         }
 
         //We have all to calculate the variance..
-        var = (float) sumEcarts / ecarts.size();
+        var = sumEcarts / ecarts.size();
 
         //Autocorrelation function
         for (int i = 0; i < lags; i++) {
@@ -82,12 +82,14 @@ public class mathFuncs {
     // Peaks Detection algorithm
     public static Pair<List<Float>, List<Float>> peaksDetect(List<Float> data, float delta, List<Float> index) {
         // Initializing needed variables
+
         List<Float> maxPeaks = new ArrayList<>(); // Maximum peaks values
-        List<Float> minPeaks = new ArrayList<>(); // Minimum peaks values
+        //List<Float> minPeaks = new ArrayList<>(); // Minimum peaks values
         List<Float> positionMax = new ArrayList<>(); // Index of every max peak
-        List<Float> positionMin = new ArrayList<>(); // Index of every min peak
+        //List<Float> positionMin = new ArrayList<>(); // Index of every min peak
+
         // Helpers for manipulation
-        float min, max, minPos, maxPos, val;
+        float min, max, maxPos, val; //minPos;
         boolean lookingForMax = true;
 
         if (data.size() != index.size()) {
@@ -111,7 +113,7 @@ public class mathFuncs {
 
         min = Float.POSITIVE_INFINITY;
         max = Float.NEGATIVE_INFINITY;
-        minPos = NaN;
+        //minPos = NaN;
         maxPos = NaN;
 
         for (int i = 0; i < data.size(); i++) {
@@ -121,26 +123,26 @@ public class mathFuncs {
                 maxPos = index.get(i);
             }
 
-            if (val < min) {
+           /* if (val < min) {
                 min = val;
                 minPos = index.get(i);
-            }
+            }*/
             if (lookingForMax) {
                 if (val < max - delta) {
                     if (maxPos!=0){
                         maxPeaks.add(max);
                         positionMax.add(maxPos);
                     }
-                    min = val;
-                    minPos = index.get(i);
+                    //min = val;
+                    //minPos = index.get(i);
                     lookingForMax = false;
                 }
             } else {
                 if (val > min + delta) {
-                    if (minPos!=0){
+                    /*if (minPos!=0){
                         minPeaks.add(min);
                         positionMin.add(minPos);
-                    }
+                    }*/
                     max = val;
                     maxPos = index.get(i);
                     lookingForMax = true;

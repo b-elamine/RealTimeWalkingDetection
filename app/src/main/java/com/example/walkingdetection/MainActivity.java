@@ -43,7 +43,9 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_DENIED) { //ask for permission
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(new String[]{Manifest.permission.ACTIVITY_RECOGNITION}, 0);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    requestPermissions(new String[]{Manifest.permission.ACTIVITY_RECOGNITION}, 0);
+                }
             }
         }
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -55,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
             //accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             sensorPresent = true;
         } else {
-            result.setText("No sensor found !");
+            result.setText("//");
             sensorPresent = false;
         }
 
@@ -67,8 +69,8 @@ public class MainActivity extends AppCompatActivity {
             sensorThread = new SensorThread((SensorManager) getSystemService(Context.SENSOR_SERVICE), buffer);
             //result.setText("Standard deviation : "+buffer.getProcessedData().getStandardDeviation());
 
-            mChart = (LineChart) findViewById(R.id.chart);
-            LineChart mChartSd = (LineChart) findViewById(R.id.chartsd);
+            mChart = findViewById(R.id.chart);
+            //LineChart mChartSd = (LineChart) findViewById(R.id.chartsd);
 
             init_Charts(mChart);
 
@@ -216,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
             if (buffer.getProcessedData()!=null) {
                 DecimalFormat df = new DecimalFormat();
                 df.setMaximumFractionDigits(3);
-                result.setText("STD : " + df.format(buffer.getProcessedData().getStandardDeviation()));
+                result.setText(df.format(buffer.getProcessedData().getStandardDeviation()));
                 System.out.println("_______________std_______________   " +
                         df.format(buffer.getProcessedData().getStandardDeviation()) +
                         "  + "

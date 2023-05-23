@@ -1,10 +1,8 @@
 package com.example.walkingdetection.tools;
 
-import static java.lang.Float.NaN;
 import android.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
-import com.example.walkingdetection.tools.mathFuncs;
 
 public class circularBuffer {
     private final float[] buffer;
@@ -41,21 +39,21 @@ public class circularBuffer {
         float sd = mathFuncs.calculateStandardDeviation(toArray());
 
         // Calculating AFC
-        List<Float> window = new ArrayList<Float>(toArray().length);
+        List<Float> window = new ArrayList<>(toArray().length);
         for (float f : toArray()){
             window.add(f);
         }
         List<Float> afc_window = mathFuncs.afc(window,window.size());
 
-        // Peaks Detection
-        float i =0;
+        //Creating an arraylist for index to be able to detect peaks
         List<Float> index = new ArrayList<>();
-        for (float f : afc_window
-             ) {
-            index.add(i++);
+        for (int i=0; i< afc_window.size(); i++){
+            index.add((float) i);
         }
-        Pair<List<Float>, List<Float>> peaks = mathFuncs.peaksDetect(afc_window, 1.2f, index);
 
+        // Peaks Detection
+        Pair<List<Float>, List<Float>> peaks = mathFuncs.peaksDetect(afc_window, 1.2f, index);
+        System.out.println(peaks);
 
         // Update tail to create overlap with next window
         tail = (tail + windowSize - overlapSize) % buffer.length;
