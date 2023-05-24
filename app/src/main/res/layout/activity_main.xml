@@ -23,13 +23,4 @@
         android:text="Chargement ..."
         />
 
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/chartsd"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginTop="10dp"
-        tools:layout_editor_absoluteY="0dp"
-        tools:layout_editor_absoluteX="8dp"
-        android:layout_below="@+id/result"/>
-
 </RelativeLayout>

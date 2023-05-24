@@ -5,7 +5,7 @@ public class gaitAnalysis {
     private final int stepCount;
     private final float standardDeviation;
 
-    public gaitAnalysis(boolean isWalking, int stepCount, float standardDeviation){
+    public gaitAnalysis(Boolean isWalking, int stepCount, float standardDeviation){
         this.isWalking = isWalking;
         this.stepCount = stepCount;
         this.standardDeviation = standardDeviation;

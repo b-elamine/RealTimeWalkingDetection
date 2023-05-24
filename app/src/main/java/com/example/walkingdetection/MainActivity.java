@@ -12,6 +12,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.WindowManager;
 import android.widget.TextView;
 
@@ -63,17 +64,16 @@ public class MainActivity extends AppCompatActivity {
 
         if (sensorPresent) {
             // Initialize the buffer with window size and overlap size
-            circularBuffer buffer = new circularBuffer(200, 50);
+            circularBuffer buffer = new circularBuffer(400, 50);
 
             // SensorThread instance
             sensorThread = new SensorThread((SensorManager) getSystemService(Context.SENSOR_SERVICE), buffer);
             //result.setText("Standard deviation : "+buffer.getProcessedData().getStandardDeviation());
 
             mChart = findViewById(R.id.chart);
-            //LineChart mChartSd = (LineChart) findViewById(R.id.chartsd);
 
             init_Charts(mChart);
-
+            System.out.println("console debug First thread will start");
             sensorThread.start(); //start collecting processing and plotting ..
         }
     }
@@ -185,7 +185,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     public class SensorThread extends Thread implements SensorEventListener {
-
         private final SensorManager sensorManager;
         private final Sensor sensor;
         private final circularBuffer buffer;
@@ -198,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void run() {
-            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_GAME);
+            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI);
         }
 
         @Override
@@ -213,16 +212,14 @@ public class MainActivity extends AppCompatActivity {
             float z_norm = (float)(z-(9.81*z/mag));
             float mag_norm = (float) (Math.sqrt((Math.pow(x_norm, 2) + Math.pow(y_norm, 2) + Math.pow(z_norm, 2))));
 
-            System.out.println("X, Y, Z : " + x_norm+", "+ y_norm+ ", +"+ z_norm +", ");
+            //System.out.println("X, Y, Z : " + x_norm+", "+ y_norm+ ", +"+ z_norm +", ");
             buffer.add(mag_norm);
             if (buffer.getProcessedData()!=null) {
                 DecimalFormat df = new DecimalFormat();
                 df.setMaximumFractionDigits(3);
                 result.setText(df.format(buffer.getProcessedData().getStandardDeviation()));
-                System.out.println("_______________std_______________   " +
-                        df.format(buffer.getProcessedData().getStandardDeviation()) +
-                        "  + "
-                        + buffer.getProcessedData().getStepCount());
+              /*  System.out.println("console debug std : " +
+                        df.format(buffer.getProcessedData().getStandardDeviation()));*/
             }
 
             addEntry(event);
