@@ -1,4 +1,5 @@
 package com.example.walkingdetection;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
@@ -6,24 +7,30 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.example.walkingdetection.tools.circularBuffer;
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
 import java.text.DecimalFormat;
@@ -31,7 +38,7 @@ import java.text.DecimalFormat;
 public class MainActivity extends AppCompatActivity {
 
 
-    TextView result;
+    TextView result, magnitude;
     private SensorThread sensorThread;
     private LineChart mChart;
 
@@ -40,7 +47,35 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getSupportActionBar().setTitle("Continuous Gait Analysis");
+
+        // Define ActionBar object
+        ActionBar actionBar;
+        actionBar = getSupportActionBar();
+
+        // Define ColorDrawable object and parse color
+        // using parseColor method
+        // with color hash code as its parameter
+        ColorDrawable colorDrawable
+                = new ColorDrawable(Color.parseColor("#93C572"));
+
+        // Set BackgroundDrawable
+        actionBar.setBackgroundDrawable(colorDrawable);
+
+        TextView textViewPrivacyPolicy = findViewById(R.id.desc);
+        String fullText = "Politique de confidentialité : Les données seront collectées des capteurs intégrés dans le smartphone et traitées en locale. Pas de transfert de données brut vers un serveur distant ou avec un tier sera effectué. Les résultats de notre analyse seront stockés dans un serveur sécurisé à Inria.";
+        String boldText = "Politique de confidentialité :";
+        SpannableString spannableString = new SpannableString(fullText);
+        int startIndex = fullText.indexOf(boldText);
+        int endIndex = startIndex + boldText.length();
+        spannableString.setSpan(new StyleSpan(Typeface.BOLD), startIndex, endIndex, 0);
+
+        textViewPrivacyPolicy.setText(spannableString);
+
+
         result = findViewById(R.id.result);
+        magnitude = findViewById(R.id.mag);
+
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_DENIED) { //ask for permission
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -58,7 +93,8 @@ public class MainActivity extends AppCompatActivity {
             //accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             sensorPresent = true;
         } else {
-            result.setText("//");
+            result.setText("N/A");
+            magnitude.setText("N/A");
             sensorPresent = false;
         }
 
@@ -110,23 +146,29 @@ public class MainActivity extends AppCompatActivity {
 
         XAxis xl = chart.getXAxis();
         xl.setTextColor(Color.WHITE);
-        xl.setDrawGridLines(true);
+        xl.setDrawAxisLine(true);
+        xl.setDrawGridLines(false);
         xl.setAvoidFirstLastClipping(true);
         xl.setEnabled(true);
 
         YAxis leftAxis = chart.getAxisLeft();
         leftAxis.setTextColor(Color.WHITE);
+        leftAxis.setDrawAxisLine(false);
         leftAxis.setDrawGridLines(false);
-        leftAxis.setAxisMaximum(10f);
-        leftAxis.setAxisMinimum(0f);
+        leftAxis.setAxisMaximum(20f);
+        leftAxis.setAxisMinimum(-8f);
         leftAxis.setDrawGridLines(true);
+
 
         YAxis rightAxis = chart.getAxisRight();
         rightAxis.setEnabled(false);
 
-        chart.getAxisLeft().setDrawGridLines(false);
-        chart.getXAxis().setDrawGridLines(false);
-        chart.setDrawBorders(false);
+        // enable description text
+        Description description = new Description();
+        description.setText("Intensité de la motion en temps réel");
+        chart.setDescription(description);
+
+
     }
 
     private void addEntry(SensorEvent event) {
@@ -214,10 +256,11 @@ public class MainActivity extends AppCompatActivity {
 
             //System.out.println("X, Y, Z : " + x_norm+", "+ y_norm+ ", +"+ z_norm +", ");
             buffer.add(mag_norm);
+            DecimalFormat df = new DecimalFormat();
+            df.setMaximumFractionDigits(3);
+            magnitude.setText("Intensité de la motion :"+" "+df.format(mag_norm));
             if (buffer.getProcessedData()!=null) {
-                DecimalFormat df = new DecimalFormat();
-                df.setMaximumFractionDigits(3);
-                result.setText(df.format(buffer.getProcessedData().getStandardDeviation()));
+                result.setText("Écart type :"+ " "+ df.format(buffer.getProcessedData().getStandardDeviation()));
               /*  System.out.println("console debug std : " +
                         df.format(buffer.getProcessedData().getStandardDeviation()));*/
             }
